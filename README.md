@@ -1,4 +1,4 @@
-odds_and_ends
+Odds and Ends
 =============
 
 Things that don't fit elsewhere.
