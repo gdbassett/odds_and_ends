@@ -110,13 +110,13 @@ def main(seed):
         
         r = random.randrange(0, 101)
         # if there's nothing in the queue, warp
-        if len(queue) == 0:
+        if maxDepth == 0 and len(queue) == 0:
             completed = []
-            queue.insert(0,warp())
+            queue.insert = [warp()]
         # Else, try a random warp
         #  random warp only works if maxDepth isn't set
         elif maxDepth == 0 and r < R:
-            queue.insert(0, warp())
+            queue = [warp()]
 
         # If still nothing in the queue, quit
         if len(queue) == 0:
@@ -134,9 +134,13 @@ def main(seed):
         else:
             completed.append(nID)
 
+
+
         ##### DO SOMETHING RIGHT HERE #####
 #        printQueue(queue, 5)
         printStatus(nID, queue, completed, depth)
+
+
 
         # add children and divider to the queue
         if maxDepth == 0:
