@@ -43,7 +43,7 @@ q = """ START n = node({0})
         MATCH n-[]->m
         RETURN DISTINCT n, m;
     """
-seed = 30185
+seed = [30185]
 
 
 
@@ -83,7 +83,7 @@ def printStatus(queue, completed):
 
 def main(seed):
     # Initialize Queue and completed
-    queue = [seed]
+    queue = seed
     completed = []
     
     # Crawl Indefinitely
