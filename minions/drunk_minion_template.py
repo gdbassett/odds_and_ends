@@ -48,13 +48,39 @@ seed = 30185
 
 ## EXECUTION
 def warp():
-    query = q.format("*")
-    neoNodes, metadata = cypher.execute(G, query)
-    node = neoNodes[0][0]
-    return node._id
+    """ NoneType -> int
+
+        Takes nothing.  Returns a random node ID matching the query
+        criteria.
+
+    """
+    # Magic to get est # of nodes in graph from restful API
+    resp = requests.get(NEODB[:-4] +
+     "manage/server/jmx/domain/org.neo4j/instance%3Dkernel%230%2Cname%3DPrimitive%20count?_=1342719685294")
+    rdict = resp.json()[0]
+    for i in range(len(rdict['attributes'])):
+            if rdict['attributes'][i]['name'] == "NumberOfNodeIdsInUse":
+                    nodeCount = rdict['attributes'][i]['value']
+    
+    # try 10 times to get a random node
+    for i in range(10):
+        r = random.randrange(0,nodeCount)
+        query = q.format("*")[:-6] + "        SKIP {0} LIMIT 1;\n".format(r)
+        neoNodes, metadata = cypher.execute(G, query)
+        if len(neoNodes) > 0:
+            node = neoNodes[0][0]
+            return node._id
+    # if we can't find a random node, return node 0
+    return 0
 
 
 def getNext(nID):
+    """ int -> list ints
+
+        Takes a node ID.  returns a list of children node IDs.
+
+    """
+
     # find children 
     query = q.format(nID)
     neoNodes, metadata = cypher.execute(G, query)
@@ -64,6 +90,13 @@ def getNext(nID):
 
 
 def printPeers(nID):
+    """ int -> NoneType
+
+        Takes a node ID, prints the node's peers.  Returns nothing.
+
+        This is primarily used as a test payload.
+
+    """
     query = q.format(nID)
     neoNodes, metadata = cypher.execute(G, query)
     print "----"

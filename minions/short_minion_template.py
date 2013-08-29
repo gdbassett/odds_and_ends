@@ -32,6 +32,7 @@ import time
 import requests
 
 ## STATIC VARIABLES
+# Warp assumes this link ends with "/data".
 NEODB = "http://192.168.56.101:7474/db/data"
 R = 10 # Number from 0 to 100 indicating the % chance to warp
 
@@ -40,6 +41,8 @@ R = 10 # Number from 0 to 100 indicating the % chance to warp
 # Connect to database
 G = neo4j.GraphDatabaseService(NEODB)
 # The query that defines nodes to search from
+# warp assumes this query ends with the ";" on.  Do not change from ; on.
+
 q = """ START n = node({0})
         MATCH n-[]->m
         RETURN DISTINCT n, m;
@@ -53,6 +56,12 @@ maxDepth = 0
 
 ## EXECUTION
 def warp():
+    """ NoneType -> int
+
+        Takes nothing.  Returns a random node ID matching the query
+        criteria.
+
+    """
     # Magic to get est # of nodes in graph from restful API
     resp = requests.get(NEODB[:-4] +
      "manage/server/jmx/domain/org.neo4j/instance%3Dkernel%230%2Cname%3DPrimitive%20count?_=1342719685294")
@@ -73,6 +82,12 @@ def warp():
     return 0
 
 def getNext(nID):
+    """ int -> list ints
+
+        Takes a node ID.  returns a list of children node IDs.
+
+    """
+
     # find children 
     query = q.format(nID)
     neoNodes, metadata = cypher.execute(G, query)
@@ -83,6 +98,14 @@ def getNext(nID):
 
 
 def printQueue(queue, l):
+    """ list, int -> NoneType
+
+        Takes a queue and an int L.  Prints the length of the queue and
+        the first L items in the queue.  Returns nothing.
+
+        This is primarily used as a test payload.
+
+    """
     if l > len(queue):
         l = len(queue)
     print "-----{0}".format(len(queue))
@@ -93,6 +116,14 @@ def printQueue(queue, l):
 
 
 def printStatus(nid, queue, completed, d):
+    """ int, list, list, int -> NoneType
+
+        Takes the current node ID, queue, list of completed node IDs,
+        and depth.  Prints the information.  Returns nothing.
+
+        This is primarily used as a test payload.
+
+    """
     print "Current Node: {1}, Length of Queue: {0}, Depth: {2}".format(
                                                    len(queue), nid, d)
     print "Completed {0}: {1}".format(len(completed), completed)
