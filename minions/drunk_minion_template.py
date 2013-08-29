@@ -42,6 +42,7 @@ q = """ START n = node({0})
         MATCH n-[]->m
         RETURN DISTINCT n, m;
     """
+# a node ID to start with
 seed = 30185
 
 

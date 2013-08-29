@@ -43,7 +43,10 @@ q = """ START n = node({0})
         MATCH n-[]->m
         RETURN DISTINCT n, m;
     """
+# a list of node IDs to start with
 seed = [30185]
+# The maximum depth to search.  Set to 0 to search indefinitely
+maxDepth = 0
 
 
 
