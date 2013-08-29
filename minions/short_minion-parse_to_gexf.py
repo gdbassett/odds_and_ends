@@ -35,8 +35,7 @@ import requests
 ## STATIC VARIABLES
 # Warp assumes this link ends with "/data".
 NEODB = "http://192.168.56.101:7474/db/data"
-R = 0 # Number from 0 to 100 indicating the % chance to warp
-
+GEXF_FILE = "somefile.gexf"
 
 ## SETUP
 # Connect to database
@@ -47,8 +46,8 @@ q = """ START n = node({0})
         MATCH n-[r]->m
         RETURN ID(n), r, type(r), m, ID(m);
     """
-# Create the networkx graph
-g = nx.Graph()
+# Create the networkx graph.  use g = nx.Graph() for undirected graph
+g = nx.DiGraph()
 # Create a set of completed nodes so we don't repeat parsing
 #  of a node
 complete = set()
@@ -58,7 +57,8 @@ complete = set()
 seed = [82719]
 # The maximum depth to search.  Set to 0 to search indefinitely
 maxDepth = 0
-
+# Number from 0 to 100 indicating the % chance to warp
+R = 0
 
 
 ## EXECUTION
@@ -84,7 +84,7 @@ def warp():
         neoNodes, metadata = cypher.execute(G, query)
         if len(neoNodes) > 0:
             node = neoNodes[0][0]
-            return node._id
+            return node
     # if we can't find a random node, return node 0
     return 0
 
@@ -137,20 +137,113 @@ def printStatus(nid, queue, completed, d):
     time.sleep(2)
 
 
+def addNodeAttributes(attr):
+    """ dict -> dict
+
+        Takes a dictionary of node attributes.  Adds any additional
+        desired attributes.  Returns the dictionary.
+
+    """
+    # If you want to add additional attributes to nodes, do it here
+    #  by adding key:value pairs to the attr dictionary
+    attr["N"] = "blue"
+    
+    return attr
+
+
+def addRelationshipAttributes(attr):
+    """ dict -> dict
+
+        Takes a dictionary of relationship attributes.  Adds any
+        additional desired attributes.  Returns the dictionary.
+
+    """
+    # If you want to add additional attributes to relationships, do it here
+    #  by adding key:value pairs to the attr dictionary
+    attr["E"] = "green"
+    
+    return attr
+    
+
+def addChildrenToNX(nID):
+    """ int, list -> set of ints
+
+        Takes a node ID.  Queries the neo4j db for children.
+        Parses the children into the networkx graph. Returns
+        a list of children ids.
+
+        Query REturn format:
+            [ID of source node int,
+             relationship properties dict,
+             relationship type str,
+             target node properties dict,
+             ID of target node int]
+
+    """
+    # setup
+    children = set()
+
+#    # either skip if visited
+#    if nID in complete:
+#        return children
+
+    # create the parent node
+    g.add_node(nID)
+    attr = G.node(nID).get_properties()
+    attr = addNodeAttributes(attr)
+    g.node[nID] = attr
+
+    # get the children
+    query = q.format(nID)
+    neoNodes, metadata = cypher.execute(G, query)
+
+    # parse them
+    for row in neoNodes:
+        # add relationships (must be before checking complete
+        #  in case we reached the node in a different way)
+        g.add_edge(row[0], row[4])
+        row[1] = row[1].get_properties()
+        row[1] = addRelationshipAttributes(row[1])
+        g[row[0]][row[4]] = row[1]
+        g[row[0]][row[4]]["Relationship_Type"] = row[2]
+
+        # Make sure we haven't done this node
+        if row[4] in complete:
+            continue        
+
+        # add the node to the networkx graph
+        g.add_node(row[4])
+        row[3] = row[3].get_properties()
+        row[3] = addNodeAttributes(row[3])
+        g.node[row[4]] = row[3]
+        complete.add(row[4])
+
+        # Get children of the node
+        query = q.format(row[4])
+        neo_nodes, metadata = cypher.execute(G, query)
+
+        # Add the child to the set of children
+        children.add(row[4])    
+
+    # return the children
+    return children
+
+
 def main(seed):
     # Initialize Queue and completed
     queue = seed
-    completed = []
     depth = 0
-    
+    global complete
+
+    print "Starting Node Export"
     # Crawl Indefinitely
     while depth <= maxDepth:
         
         r = random.randrange(0, 101)
         # if there's nothing in the queue, warp
-        if maxDepth == 0 and len(queue) == 0:
-            completed = []
-            queue.insert = [warp()]
+        if maxDepth == 0 and len(queue) == 0 and R is not 0:
+            complete = set()
+            queue = [warp()]
         # Else, try a random warp
         #  random warp only works if maxDepth isn't set
         elif maxDepth == 0 and r < R:
@@ -166,25 +259,23 @@ def main(seed):
         if type(nID) == str:
             depth = len(nID)
             continue
-        # if it's a node thats been visited, continue
-        elif nID in completed:
-            continue
-        else:
-            completed.append(nID)
-
 
 
         ##### DO SOMETHING RIGHT HERE #####
-#        printQueue(queue, 5)
-        printStatus(nID, queue, completed, depth)
-
-
+        children = addChildrenToNX(nID)
+#        printStatus(nID, queue, complete, depth)
 
         # add children and divider to the queue
         if maxDepth == 0:
-            queue = queue + getNext(nID)
+            queue = queue + list(children)
         else:
-            queue = queue + ['-' * (depth + 1)] + getNext(nID)
+            queue = queue + ['-' * (depth + 1)] + list(children)
+
+    print "Saving File"
+    nx.write_gexf(g, GEXF_FILE)
+
+
+    print "Done"
         
 
 if __name__ == "__main__":

@@ -140,7 +140,7 @@ def main(seed):
     while 1:
         r = random.randrange(0, 101)
         # if there's nothing in the queue, warp
-        if maxDepth == 0 and len(queue) == 0:
+        if maxDepth == 0 and len(queue) == 0 and R is not 0:
             completed = []
             queue = [warp()]
         # Else, try a random warp

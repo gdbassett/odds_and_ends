@@ -141,9 +141,9 @@ def main(seed):
         
         r = random.randrange(0, 101)
         # if there's nothing in the queue, warp
-        if maxDepth == 0 and len(queue) == 0:
+        if maxDepth == 0 and len(queue) == 0 and R is not 0:
             completed = []
-            queue.insert = [warp()]
+            queue = [warp()]
         # Else, try a random warp
         #  random warp only works if maxDepth isn't set
         elif maxDepth == 0 and r < R:
