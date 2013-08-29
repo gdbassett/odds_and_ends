@@ -31,6 +31,7 @@ import networkx as nx
 import random
 import time
 import requests
+import sys
 
 ## STATIC VARIABLES
 # Warp assumes this link ends with "/data".
@@ -238,6 +239,10 @@ def main(seed):
     print "Starting Node Export"
     # Crawl Indefinitely
     while depth <= maxDepth:
+
+        # progress bar
+        if len(complete) % 10 == 0:
+            sys.stdout.write("*")
         
         r = random.randrange(0, 101)
         # if there's nothing in the queue, warp
@@ -270,6 +275,8 @@ def main(seed):
             queue = queue + list(children)
         else:
             queue = queue + ['-' * (depth + 1)] + list(children)
+
+    print ""
 
     print "Saving File"
     nx.write_gexf(g, GEXF_FILE)
