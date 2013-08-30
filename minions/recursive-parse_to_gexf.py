@@ -150,11 +150,11 @@ def main(seed):
         neo_nodes, metadata = cypher.execute(graph_db, query)
 
         # add the node
-        g.add_node(row[1])
-        attr = graph_db.node(row[1]).get_properties()
+        g.add_node(neo_nodes[0][1])
+        attr = graph_db.node(neo_nodes[0][1]).get_properties()
         attr = addNodeAttributes(attr)
-        g.node[row[1]] = attr
-        complete.add(row[1])
+        g.node[neo_nodes[0][1]] = attr
+        complete.add(neo_nodes[0][1])
 
         # pass them to the recursive DFS
         dfs_parse_nodes(neo_nodes, depth + 1)
