@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?><gexf version="1.1" xmlns="http://www.gexf.net/1.1draft" xmlns:viz="http://www.gexf.net/1.1draft/viz" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2001/XMLSchema-instance">
+  <graph defaultedgetype="undirected" mode="static">
+    <attributes class="edge" mode="static">
+      <attribute id="4" title="Relationship_Type" type="string" />
+    </attributes>
+    <attributes class="node" mode="static">
+      <attribute id="0" title="color" type="string" />
+      <attribute id="1" title="number" type="integer" />
+      <attribute id="2" title="Color" type="string" />
+      <attribute id="3" title="Candy" type="integer" />
+    </attributes>
+    <nodes>
+      <node id="82720" label="82720" />
+      <node id="82721" label="82721" />
+      <node id="82722" label="82722">
+        <attvalues>
+          <attvalue for="0" value="green" />
+          <attvalue for="1" value="27" />
+        </attvalues>
+      </node>
+      <node id="82723" label="82723" />
+      <node id="82724" label="82724" />
+      <node id="82725" label="82725" />
+      <node id="82719" label="82719">
+        <attvalues>
+          <attvalue for="2" value="blue" />
+          <attvalue for="1" value="5" />
+          <attvalue for="3" value="83" />
+        </attvalues>
+      </node>
+    </nodes>
+    <edges>
+      <edge id="0" source="82720" target="82722">
+        <attvalues>
+          <attvalue for="4" value="RELATED_TO" />
+        </attvalues>
+      </edge>
+      <edge id="1" source="82720" target="82719" />
+      <edge id="2" source="82721" target="82719" />
+      <edge id="3" source="82722" target="82723">
+        <attvalues>
+          <attvalue for="4" value="RELATED_TO" />
+        </attvalues>
+      </edge>
+      <edge id="4" source="82722" target="82724">
+        <attvalues>
+          <attvalue for="4" value="RELATED_TO" />
+        </attvalues>
+      </edge>
+      <edge id="5" source="82723" target="82725">
+        <attvalues>
+          <attvalue for="4" value="RELATED_TO" />
+        </attvalues>
+      </edge>
+    </edges>
+  </graph>
+</gexf>

@@ -147,7 +147,7 @@ def addNodeAttributes(attr):
     """
     # If you want to add additional attributes to nodes, do it here
     #  by adding key:value pairs to the attr dictionary
-    attr["N"] = "blue"
+#    attr["N"] = "blue"
     
     return attr
 
@@ -161,7 +161,7 @@ def addRelationshipAttributes(attr):
     """
     # If you want to add additional attributes to relationships, do it here
     #  by adding key:value pairs to the attr dictionary
-    attr["E"] = "green"
+#    attr["E"] = "green"
     
     return attr
     
