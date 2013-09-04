@@ -100,7 +100,7 @@ def dfs_parse_nodes(rows, depth):
     Operates Recursively
 
     """
-    if depth > maxDepth:
+    if maxDepth is not 0 and depth > maxDepth:
         return    
     
     for row in rows:
