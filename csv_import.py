@@ -42,7 +42,7 @@ NEODB = "http://192.168.56.101:7474/db/data"
 CSV_FILE = "input_file.csv"
 # List of the columns in the CSV file to import
 #  Current values are for example only and should be replaced
-import_list = [0,1,2,3,4,5]
+import_list = [0,1,2]
 # Establish the list of attribute names from the CSV file:
 #  Current values are for example only and should be replaced
 attributes = ["IP", "nb_name", "mac_address", "start_time", "os_name"]
@@ -51,6 +51,8 @@ attributes = ["IP", "nb_name", "mac_address", "start_time", "os_name"]
 parentRelationshipType = "has_child"
 # The row to start on.  0 to start at beginning of file.
 startRow = 0
+# If the first row is column headers, set to true.
+columnHeaders = True
 ##
 
 ## SETUP
@@ -59,7 +61,6 @@ G = neo4j.GraphDatabaseService(NEODB)
 # Logging Setup
 FORMAT = '%(asctime)s - %(levelname)s - %(message)s'
 logging.basicConfig(format=FORMAT, level=logging.ERROR)
-SKIPPED_LOG = "host_import_skipped.log"
 
 
 
@@ -174,13 +175,22 @@ def get_parent(n, r, *args, **xargs):
                         
 
 def main():
+    global startRow
   
     # open csv
     with open(CSV_FILE, 'rb') as f:
+        # if there are column headers, read them
+        if columnHeaders:
+            f.seek(0)
+            linereader = csv.reader(f, delimiter=',', quotechar='\"')
+            attributes = linereader.next()
+            if startRow is not 0:
+                startRow -= 1
+            
         # skip to a specific row based on startRow variable
-        f.seek(startRow)
+        for i in range(1,startRow):
+            linereader.next()
 
-        linereader = csv.reader(f, delimiter=',', quotechar='\"')
 
         print "Starting import at {0}.".format(
             datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ'))
@@ -192,14 +202,14 @@ def main():
             logging.debug(row)
             
             # get the root node for the row
-            hostNode = create_row_anchor(row, counter)
+            hostNode = create_row_anchor(row, linereader.line_num)
 
             # Import the columns in the csv and link to the host node
             for c in import_list:
                 if row[c]:
                     attr = {"Class":"attribute",
                             "attribute":attributes[c],
-                            attributes[i]:row[c]}
+                            attributes[c]:row[c]}
                     attrNode, b = get_or_create_node(attr)
                     # connect the attribute to the host with an edge
                     # Slight speedup.  If attrNode is new, just create edge)
@@ -214,6 +224,8 @@ def main():
                 get_or_create_edge(parentNode,hostNode,parentRelationshipType)
 
             # increment counter
+            if counter % 10 == 0:
+                print linereader.line_num
             counter += 1
 
             
